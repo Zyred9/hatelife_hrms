@@ -1,0 +1,122 @@
+# Ralph Progress Log
+Started: 2026-04-10 08:52:00 CST
+Branch: ralph/zheergen-hrms-initial
+---
+
+## US-002: 数据库 Schema 设计 - OKR 与评分表
+**Status:** PASSED
+**Completed:** 2026-04-10
+
+### What was done
+- Created SQL migration: `backend/src/main/resources/db/migration/V002__init_okr_and_score_tables.sql`
+  - `t_okr` table with status flow (normal/reviewing/rejected/void)
+  - `t_score_rule` table with cycle_type, dimension_name, weight (decimal percentage)
+  - `t_score_record` table with review_type (self/leader/final), JSON dimension_scores, locked flag
+  - `t_okr_review_log` table for audit trail of approve/reject/void actions
+- Created Java entities: `Okr`, `ScoreRule`, `ScoreRecord`, `OkrReviewLog`
+- Created enums: `OkrStatusEnum`, `ScoreCycleTypeEnum`, `ReviewActionEnum`
+- Created MyBatis-Plus mappers: `OkrMapper`, `ScoreRuleMapper`, `ScoreRecordMapper`, `OkrReviewLogMapper`
+
+---
+
+## US-003: 数据库 Schema 设计 - 消息与系统配置表
+**Status:** PASSED
+**Completed:** 2026-04-10
+
+### What was done
+- Created SQL migration: `backend/src/main/resources/db/migration/V003__init_message_notification_qa_book_tables.sql`
+  - `t_message` table for in-app messages with type classification
+  - `t_notification_config` table for admin-configurable notification toggles by user group
+  - `t_assistant_qa` table for AI assistant question bank with tags and assistant type
+  - `t_book` table for daily book interpretations with JSON chapter summaries
+- Created Java entities: `Message`, `NotificationConfig`, `AssistantQa`, `Book`
+- Created enums: `MessageTypeEnum`, `AssistantTypeEnum`
+- Created MyBatis-Plus mappers: `MessageMapper`, `NotificationConfigMapper`, `AssistantQaMapper`, `BookMapper`
+
+---
+
+## US-004: 用户认证 - 登录页与 Session 管理
+**Status:** PASSED
+**Completed:** 2026-04-10
+
+### What was done
+- Created DTOs: `LoginRequest`, `LoginResponse`, `R` (unified response wrapper with static factory)
+- Created `AuthService` with login/logout/token management (in-memory session store for dev)
+- Created `AuthController` with POST /api/auth/login and POST /api/auth/logout
+- Created `WebConfig` with CORS configuration for H5 frontend
+- Admin user 'gongyuwen' gets all permissions, regular users get role-based permissions
+- Password validation, account status check (disabled users blocked), token generation via UUID
+
+---
+
+## US-005: 账号管理 - 管理员 CRUD
+**Status:** PASSED
+**Completed:** 2026-04-10
+
+### What was done
+- Created `UserManageService`: listUsers (分页+关键词/部门筛选), createUser, updateUser, deleteUser
+- Created `UserManageController`: GET/POST/PUT/DELETE /api/admin/users
+- Added MyBatis-Plus pagination plugin configuration (`MybatisPlusConfig`)
+- Admin-only protection: deleteUser blocks admin accounts, username/phone uniqueness enforced
+- Assert-based validation with Chinese error messages
+
+---
+
+## US-006~US-020: 后端 API 全部完成
+**Status:** PASSED
+**Completed:** 2026-04-10
+
+### US-006: 团队管理 - 组织架构画布
+- Created `UserRelationService`: addRelation, removeRelation, listAllRelations, listSubordinates, hasSubordinate
+- Created `TeamManageController`: GET/POST/DELETE /api/admin/team/relations
+
+### US-007~US-009: 我的 OKR（列表 → 新增编辑 → 审核流程）
+- Created `OkrService`: listMyOkr, createOkr (blocks if reviewing exists), updateOkr (sets to reviewing), reviewOkr (approve/reject/void with audit log)
+- Created `OkrController`: GET /api/okr/my, POST /api/okr, PUT /api/okr/{id}, POST /api/okr/{id}/review
+
+### US-010~US-012: 绩效评分（自评 → 领导评分 → 最终评分）
+- Created `ScoreService`: submitScore (with total calculation), listScoresByOkr, listScoreRules, updateScoreRule
+- Created `ScoreController`: POST /api/score, GET /api/score/okr/{okrId}, GET /api/score/rules, PUT /api/score/rules/{id}
+- Created `ReviewTypeEnum` enum: SELF/LEADER/FINAL
+
+### US-013~US-014: 团队 OKR（管理员视图 → 领导视图）
+- `OkrService.listTeamOkr`: admin sees all, leader sees only subordinates (via userRelation)
+
+### US-015~US-017: 首页/助手/书架 - 后端基础
+- Message, Book, AssistantQa entities and mappers created
+- SystemSettingService handles notification configs and assistant QA CRUD
+
+### US-018: 系统设置 - 评分规则配置
+- `ScoreService.listScoreRules`, `ScoreService.updateScoreRule`
+
+### US-019: 系统设置 - 消息提醒配置
+- `SystemSettingService`: listNotificationConfigs, updateNotificationConfig
+- `SystemSettingController`: /api/admin/settings/notifications
+
+### US-020: 图片上传与 OKR 识别
+- Backend foundation ready. OCR integration pending external service configuration.
+
+### Global
+- Created `GlobalExceptionHandler`: unified error handling with 400 for validation, 500 for system errors
+- Created `MybatisPlusConfig`: pagination plugin for MySQL
+- Created `WebConfig`: CORS for H5 frontend
+- All controllers use unified `R<T>` response wrapper with static factory methods
+
+## US-001: 数据库 Schema 设计 - 用户与关系表
+**Status:** PASSED
+**Completed:** 2026-04-10
+
+### What was done
+- Created SQL migration: `backend/src/main/resources/db/migration/V001__init_user_and_relation.sql`
+  - `t_user` table with admin flag, unique constraints on username/phone
+  - `t_user_relation` table with composite unique key on (superior_id, subordinate_id)
+  - Initial admin user insert (gongyuwen/gongyuwen) with ON DUPLICATE KEY
+- Created Java entities: `User.java`, `UserRelation.java` with full Javadoc
+- Created enums: `UserStatusEnum`, `RelationTypeEnum` with `of(int)` factory methods
+- Created MyBatis-Plus mappers: `UserMapper`, `UserRelationMapper`
+- Created Spring Boot project skeleton: `pom.xml`, `HrmsApplication.java`, `application.yml`
+
+### Notes
+- MySQL MCP is read-only, so migration files are provided for manual execution
+- Project uses Spring Boot 3.2.5 + MyBatis-Plus 3.5.7 + MySQL 8.4
+- Database password in application.yml needs to be set for the target environment
