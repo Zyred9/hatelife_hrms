@@ -1,0 +1,345 @@
+{
+  "project": "折耳根绩效管理平台",
+  "branchName": "ralph/zheergen-hrms-initial",
+  "description": "企业内部绩效管理平台 - H5 网页站点，包含用户管理、OKR 管理、绩效评分、团队管理、AI 助手等模块",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "数据库 Schema 设计 - 用户与关系表",
+      "description": "As a developer, I need database tables for users and hierarchical relationships to support the multi-level, many-to-many reporting structure.",
+      "acceptanceCriteria": [
+        "Create t_user table: id, username, password, name, gender, age, phone, department, status",
+        "Create t_user_relation table: id, superior_id, subordinate_id (supports multi-level many-to-many hierarchy)",
+        "Insert admin user: username='gongyuwen', password='gongyuwen' with full data and feature permissions",
+        "Create enum or lookup tables for user status and roles",
+        "Compilation passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "数据库 Schema 设计 - OKR 与评分表",
+      "description": "As a developer, I need database tables for OKR records and performance scoring to store the full OKR lifecycle.",
+      "acceptanceCriteria": [
+        "Create t_okr table: id, user_id, title, content, status (正常/审核中/驳回待修改/作废), created_at, updated_at",
+        "Create t_okr_review table: id, okr_id, reviewer_id, review_type (self/leader/final), score, details (JSON), completed_at",
+        "Create t_score_rule table: id, dimension_name, weight, description, cycle_type (employee/leader)",
+        "Create t_score_record table: id, okr_id, reviewer_id, total_score, dimension_scores (JSON), locked (boolean)",
+        "Compilation passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "数据库 Schema 设计 - 消息与系统配置表",
+      "description": "As a developer, I need tables for in-app messages, notification settings, and assistant question bank.",
+      "acceptanceCriteria": [
+        "Create t_message table: id, user_id, title, content, type, is_read, created_at",
+        "Create t_notification_config table: id, config_key, enabled, target_user_groups (JSON)",
+        "Create t_assistant_qa table: id, question, answer, assistant_type (根宝/多多/蛋挞), tags",
+        "Create t_book table: id, title, summary, chapters (JSON), interpreted_at",
+        "Compilation passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "用户认证 - 登录页与 Session 管理",
+      "description": "As a user, I want to log in with my username and password so that I can access the platform with my role-based permissions.",
+      "acceptanceCriteria": [
+        "Login page with username and password fields",
+        "Admin user 'gongyuwen' logs in and gets all permissions",
+        "Regular user logs in and gets role-based permissions (领导/员工)",
+        "Session or JWT token management with expiration",
+        "Redirect to homepage after successful login",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "账号管理 - 管理员 CRUD",
+      "description": "As an admin, I want to create, view, edit, and delete user accounts so that I can manage the team.",
+      "acceptanceCriteria": [
+        "Admin-only account list page with all user fields displayed",
+        "Create user form: name, gender, age, phone, department, password",
+        "Edit user form with all fields updatable",
+        "Delete user with confirmation dialog",
+        "Search/filter by name, department, phone",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "团队管理 - 组织架构画布",
+      "description": "As an admin, I want a canvas view to draw department columns and connect reporting lines with arrows so that I can visualize the team hierarchy.",
+      "acceptanceCriteria": [
+        "Admin-only team management page with department column layout",
+        "Visual canvas with drag-and-drop or click-to-connect interaction",
+        "Single-direction arrows showing reporting lines (arrow points to superior)",
+        "Ability to add/remove departments and users on canvas",
+        "Save hierarchy changes to database",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "我的 OKR - 列表与状态展示",
+      "description": "As a user, I want to see my own OKR list with status indicators so that I can track my OKR lifecycle.",
+      "acceptanceCriteria": [
+        "OKR list page showing user's own OKRs only",
+        "Status badges: 正常, 审核中, 驳回待修改, 作废",
+        "Status=正常: show 新增 and 编辑 buttons",
+        "Status=审核中: no action buttons shown",
+        "Status=驳回待修改: show 编辑 button",
+        "Status=作废: show 新增 button",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "我的 OKR - 新增与编辑",
+      "description": "As a user, I want to create and edit OKRs via manual input or image upload so that I can record my objectives.",
+      "acceptanceCriteria": [
+        "Manual OKR creation form with objective and key results fields",
+        "Image upload for OKR (with OCR recognition to extract text)",
+        "After creation, OKR status becomes 审核中 and 新增 button disabled",
+        "Edit OKR form pre-filled with existing data",
+        "After editing, OKR status becomes 审核中 and edit disabled until reviewed",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "我的 OKR - 审核提交流程",
+      "description": "As a user, I want to submit my OKR for review so that my manager can approve or reject it.",
+      "acceptanceCriteria": [
+        "Single manager: OKR submitted, manager receives review task",
+        "Multiple managers: parallel approval, any rejection sets status to 驳回待修改",
+        "No manager: routes to admin for review",
+        "Manager can approve (status=正常) or reject (status=驳回待修改 with reason)",
+        "Admin can approve, reject, or void (status=作废)",
+        "In-app message notification sent on status change",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "绩效评分 - 自评",
+      "description": "As a user, I want to self-evaluate my OKR so that I can provide my own performance assessment.",
+      "acceptanceCriteria": [
+        "Self-evaluation form accessible from 正常 status OKR",
+        "Form displays scoring dimensions from t_score_rule with weights",
+        "Total score auto-calculated: sum of (dimension_score × weight)",
+        "After submission, score is locked and cannot be modified",
+        "If no manager: proceed directly to final scoring",
+        "If has manager: trigger leader scoring task",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "绩效评分 - 领导评分",
+      "description": "As a manager, I want to score my subordinate's OKR so that I can provide performance evaluation.",
+      "acceptanceCriteria": [
+        "Leader scoring form visible after subordinate completes self-evaluation",
+        "Same scoring dimensions as self-evaluation form",
+        "Total score auto-calculated with weights",
+        "After submission, score locked and triggers admin final scoring task",
+        "Leader can view self-evaluation and leader scores after completion",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "绩效评分 - 管理员录入最终评分",
+      "description": "As an admin, I want to enter the final performance score so that the OKR evaluation cycle is complete.",
+      "acceptanceCriteria": [
+        "Final scoring form accessible after leader scoring is complete (or self-eval if no leader)",
+        "Admin can input or adjust final score",
+        "After submission, all three scores (self, leader, final) are visible to all parties",
+        "All scores locked after final submission",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "团队 OKR - 管理员视图",
+      "description": "As an admin, I want to see all team members' OKRs grouped by manager so that I can oversee the entire organization.",
+      "acceptanceCriteria": [
+        "Admin-only page with OKRs grouped by manager/department",
+        "Displays all users' OKRs across the organization",
+        "Can approve, reject, or void OKRs in 审核中 status",
+        "Can enter leader scoring or final scoring based on current stage",
+        "Filter by status, department, user",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "团队 OKR - 领导视图",
+      "description": "As a manager, I want to see my direct subordinates' OKRs so that I can review and score them.",
+      "acceptanceCriteria": [
+        "Manager-only page showing only direct subordinates' OKRs",
+        "Can approve, reject, or void OKRs in 审核中 status",
+        "Can enter leader scoring after subordinate self-evaluation",
+        "Can enter final scoring if applicable",
+        "Filter by status and subordinate",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "首页 - 仪表盘布局",
+      "description": "As a user, I want a homepage dashboard with AI assistant, bookshelf, calendar, task todos, and recent visits so that I can quickly access key features.",
+      "acceptanceCriteria": [
+        "Homepage displays after login with all sections visible",
+        "AI assistant section with avatar image and searchable question input",
+        "Bookshelf section showing previously interpreted books",
+        "Calendar section with highlighted dates for active workflows",
+        "Todo section with two tabs: 当前待办 and 历史流程",
+        "Recent visits section showing last 5 accessed features",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "AI 助手 - 形象切换与问答",
+      "description": "As a user, I want to interact with AI assistants (根宝, 多多, 蛋挞) so that I can get answers to common questions.",
+      "acceptanceCriteria": [
+        "Three assistant avatars displayed: 根宝(银渐层), 多多(布偶), 蛋挞(金渐层)",
+        "Click to switch between assistant characters",
+        "Care message displayed every 1 minute",
+        "Search box matches questions from t_assistant_qa question bank",
+        "Admin-configurable question bank via system settings",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "书架 - 书籍解读",
+      "description": "As a user, I want to view interpreted books with chapter summaries and add new books for daily interpretation.",
+      "acceptanceCriteria": [
+        "Bookshelf displays previously interpreted books",
+        "Admin can add one new book per day by entering full title",
+        "Book interpretation includes chapter-by-chapter summary and reading notes",
+        "Online search integration for book information lookup",
+        "Book detail page shows full interpretation content",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "系统设置 - 评分规则配置",
+      "description": "As an admin, I want to configure scoring rules so that I can adjust evaluation dimensions, weights, and cycles.",
+      "acceptanceCriteria": [
+        "Admin-only settings page for scoring rules",
+        "Can configure employee and leader evaluation cycles separately",
+        "Can add/edit/delete scoring dimensions with weights and descriptions",
+        "Weight validation: total must equal 100%",
+        "Changes apply to new evaluations, existing locked evaluations unaffected",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "系统设置 - 消息提醒配置",
+      "description": "As an admin, I want to configure notification toggles so that users receive timely reminders for OKR and scoring workflows.",
+      "acceptanceCriteria": [
+        "Admin-only notification settings page",
+        "Toggle for OKR process reminders (by user group)",
+        "Toggle for scoring process reminders (by user group)",
+        "Toggle for OKR submission reminders (by user group)",
+        "Toggle for self-evaluation reminders (by user group)",
+        "Settings persisted and applied in notification sending logic",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "图片上传与 OKR 识别",
+      "description": "As a user, I want to upload images and have OKR content automatically extracted via OCR so that I can digitize paper OKRs.",
+      "acceptanceCriteria": [
+        "Image upload component with drag-and-drop and file picker",
+        "OCR processing to extract text from uploaded images",
+        "Extracted text auto-populates OKR form fields",
+        "User can review and edit OCR results before saving",
+        "Support common image formats: JPG, PNG",
+        "Compilation passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
